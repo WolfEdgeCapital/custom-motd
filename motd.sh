@@ -15,8 +15,8 @@ whotest[0]='test' || (echo 'Failure: arrays not supported in your version of bas
 #############################################################################
 
 settings=(
-    LOGOSMALL
-#    LOGOBIG
+    #LOGOSMALL
+    LOGOBIG
     SYSTEM
     DATE
     UPTIME
@@ -82,26 +82,26 @@ function displayMessage {
 
 function metrics {
     case "$1" in
-    'LOGOSMALL')
-        logo="${colour[neutral]}
-         \\\ // ${colour[warning]}
-         ◖ ● ◗
-        ◖ ● ● ◗ ${colour[neutral]}Raspberry Pi${colour[warning]}
-         ◖ ● ◗
-           •
-        "
-        displayMessage '' "$logo"
-        ;;
+    #'LOGOSMALL')
+        #logo="${colour[neutral]}
+        #\\\ // ${colour[warning]}
+        # ◖ ● ◗
+        #◖ ● ● ◗ ${colour[neutral]}Raspberry Pi${colour[warning]}
+        # ◖ ● ◗
+        #   •
+        #"
+        #displayMessage '' "$logo"
+        #;;
     'LOGOBIG')
         logo="${colour[neutral]}
-                                                                                        
+        ${colour[neutral]}                                                                                
 
 dP   dP   dP          dP .8888b  88888888b       dP                   
-88   88   88          88 88   ''  88              88                   
+88   88   88          88 88   '' 88              88                   
 88  .8P  .8P .d8888b. 88 88aaa  a88aaaa    .d888b88 .d8888b. .d8888b. 
-88  d8'  d8' 88'  `88 88 88      88        88'  `88 88'  `88 88ooood8 
+88  d8'  d8' 88'   88 88 88      88        88'   88 88'   88 88ooood8 
 88.d8P8.d8P  88.  .88 88 88      88        88.  .88 88.  .88 88.  ... 
-8888' Y88'   `88888P' dP dP      88888888P `88888P8 `8888P88 `88888P' 
+8888' Y88'    88888P  dP dP      88888888P  88888P8  8888P88  88888P' 
                                                          .88          
                                                      d8888P"
 
@@ -135,7 +135,7 @@ dP   dP   dP          dP .8888b  88888888b       dP
         displayMessage 'Running processes..:' "$(ps ax | wc -l | tr -d " ")"
         ;;
     'IP')
-        lip=$(ip addr show eth0 | grep 'inet ' | awk '{print $2}' | cut -f1 -d'/')
+        lip=$(ip addr show cni0 | grep 'inet ' | awk '{print $2}' | cut -f1 -d'/')
         eip=$(wget -q -O - http://icanhazip.com/ | tail)
         if [ "$lip" ]; then
             localIP="local: ${lip}"
@@ -156,42 +156,13 @@ dP   dP   dP          dP .8888b  88888888b       dP
     'UPDATES')
         displayMessage 'Available updates..:' "$(apt-get -s dist-upgrade | tail -n 1 | cut -d' ' -f 10) packets can be updated"
         ;;
-    'WEATHER')
-        if [ "$degrees" == "F" ]; then
-            metric=0
-        else
-            metric=1
-        fi
-        displayMessage 'Weather............:' "$(curl -s "http://rss.accuweather.com/rss/liveweather_rss.asp?metric=$metric&locCode=$weatherCode" | sed -n '/Currently:/ s/.*: \(.*\): \([0-9]*\)\([CF]\).*/\2°\3, \1/p')"
-        ;;
-    'CPUTEMP')
-        cpu=$(</sys/class/thermal/thermal_zone0/temp)
-        cpu=$(echo "${cpu} 100 0.1" | awk '{printf "%.2f\n", $1/$2*$3}')
-        if [ "$degrees" == "F" ]; then
-            cpu=$(echo "1.8 $cpu 32" | awk '{printf "%.2f\n", $1*$2+$3}')
-        fi
-        displayMessage 'CPU temperature....:' "${cpu}°$degrees"
-        ;;
-    'GPUTEMP')
-        gpu=$(/opt/vc/bin/vcgencmd measure_temp | awk -F "[=']" '{print $2}')
-        if [ "$degrees" == "F" ]; then
-            gpu=$(echo "1.8 $gpu 32" | awk '{printf "%.2f\n", $1*$2+$3}')
-        fi
-        displayMessage 'GPU temperature....:' "${gpu}°$degrees"
-        ;;
     'SSHLOGINS')
         displayMessage 'SSH logins.........:' "Currently $(who -q | cut -c "9-11" | sed "1 d") user(s) logged in."
         ;;
     'LASTLOGIN')
         displayMessage 'Last login.........:' "$(last -2 -a -F | awk 'NR==2 {print $1,"on",$3,$4,$5,$6,$7,"from " $15}')"
         ;;
-    'MESSAGES')
-        displayMessage 'Last 3 messages....:' ""
-        displayMessage '' "${colour[reset]}$(tail -3 /var/log/messages)"
-        ;;
-    *)
         # default, do nothing
-        ;;
     esac
 }
 
